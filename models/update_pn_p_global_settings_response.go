@@ -31,7 +31,7 @@ type UpdatePnPGlobalSettingsResponse struct {
 	DefaultProfile *UpdatePnPGlobalSettingsResponseDefaultProfile `json:"defaultProfile,omitempty"`
 
 	// id
-	ID string `json:"id,omitempty"`
+	_ID string `json:"id,omitempty"`
 
 	// sava mapping list
 	SavaMappingList []*UpdatePnPGlobalSettingsResponseSavaMappingListItems0 `json:"savaMappingList"`

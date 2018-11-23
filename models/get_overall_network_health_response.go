@@ -80,7 +80,7 @@ type GetOverallNetworkHealthResponseResponse struct {
 	HealthDistirubution []*GetOverallNetworkHealthResponseResponseHealthDistirubutionItems0 `json:"healthDistirubution"`
 
 	// latest health score
-	LatestHealthScore string `json:"latestHealthScore,omitempty"`
+	LatestHealthScore int `json:"latestHealthScore,omitempty"`
 
 	// latest measured by entity
 	LatestMeasuredByEntity string `json:"latestMeasuredByEntity,omitempty"`
@@ -89,10 +89,10 @@ type GetOverallNetworkHealthResponseResponse struct {
 	MeasuredBy string `json:"measuredBy,omitempty"`
 
 	// monitored devices
-	MonitoredDevices string `json:"monitoredDevices,omitempty"`
+	MonitoredDevices int `json:"monitoredDevices,omitempty"`
 
 	// un monitored devices
-	UnMonitoredDevices string `json:"unMonitoredDevices,omitempty"`
+	UnMonitoredDevices int `json:"unMonitoredDevices,omitempty"`
 }
 
 // Validate validates this get overall network health response response
@@ -157,22 +157,22 @@ func (m *GetOverallNetworkHealthResponseResponse) UnmarshalBinary(b []byte) erro
 type GetOverallNetworkHealthResponseResponseHealthDistirubutionItems0 struct {
 
 	// bad percentage
-	BadPercentage string `json:"badPercentage,omitempty"`
+	BadPercentage float64 `json:"badPercentage,omitempty"`
 
 	// category
 	Category string `json:"category,omitempty"`
 
 	// fair percentage
-	FairPercentage string `json:"fairPercentage,omitempty"`
+	FairPercentage float64 `json:"fairPercentage,omitempty"`
 
 	// good percentage
-	GoodPercentage string `json:"goodPercentage,omitempty"`
+	GoodPercentage float64 `json:"goodPercentage,omitempty"`
 
 	// health score
-	HealthScore string `json:"healthScore,omitempty"`
+	HealthScore float64 `json:"healthScore,omitempty"`
 
 	// total count
-	TotalCount string `json:"totalCount,omitempty"`
+	TotalCount int `json:"totalCount,omitempty"`
 }
 
 // Validate validates this get overall network health response response health distirubution items0

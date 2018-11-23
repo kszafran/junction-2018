@@ -19,7 +19,7 @@ import (
 type GetPnPGlobalSettingsResponse struct {
 
 	// id
-	ID string `json:"_id,omitempty"`
+	_ID string `json:"_id,omitempty"`
 
 	// aaa credentials
 	AaaCredentials *GetPnPGlobalSettingsResponseAaaCredentials `json:"aaaCredentials,omitempty"`
