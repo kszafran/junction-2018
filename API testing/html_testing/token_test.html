@@ -1,0 +1,31 @@
+<html>
+<head>
+<title>Sample</title>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script> 
+<script type="text/javascript"> 
+var settings = {
+  "async": true,
+  "crossDomain": true,
+  "url": "https://82.203.192.245/dna/system/api/v1/auth/token",
+  "method": "POST",
+  "headers": {
+    "Content-Type": "application/json",
+    "Authorization": "Basic ZGV2ZWxvcGVyOkhhY2tqdW5jdGlvbjIwMTg=",
+    "cache-control": "no-cache",
+    "Postman-Token": "6ecbef56-76df-4c9b-a9b7-07fc04a02be9"
+  },
+  "processData": false,
+  "data": ""
+}
+
+$.ajax(settings).done(function (response) {
+  console.log(response);
+});
+</script>
+</head>
+<body>
+
+	<p>Hello</p>
+
+</body>
+</html>
