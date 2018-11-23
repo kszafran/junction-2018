@@ -63,3 +63,5 @@ typings/
 # IntelliJ Idea
 .idea/
 *.iml
+
+vendor/*/
