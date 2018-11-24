@@ -11,6 +11,7 @@ func main() {
 	refreshToken()
 	r := gin.Default()
 	r.GET("/test", testHandler)
+	r.GET("/topology", topologyHandler)
 	r.GET("/path-trace", pathTraceHandler)
 	r.POST("/sensor/:ip", sensorHandler)
 	err := r.Run()
@@ -28,6 +29,17 @@ func testHandler(c *gin.Context) {
 		return
 	}
 	c.JSON(200, health)
+}
+
+func topologyHandler(c *gin.Context) {
+	var topology models.TopologyResult
+	err := get("/topology/physical-topology", nil, &topology)
+	if err != nil {
+		c.String(500, "failed to get topology: %v", err)
+		c.Error(err)
+		return
+	}
+	c.JSON(200, topology.Response)
 }
 
 func pathTraceHandler(c *gin.Context) {
