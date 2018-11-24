@@ -3,15 +3,15 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/kszafran/junction-2018/models"
-	"io/ioutil"
 	"log"
 )
 
 func main() {
-	refreshToken()
+	KeepTokenFresh()
 	r := gin.Default()
 	r.GET("/test", testHandler)
 	r.GET("/topology", topologyHandler)
+	r.GET("/device-health/:mac", deviceHealthHandler)
 	r.GET("/path-trace", pathTraceHandler)
 	r.POST("/sensor/:ip", sensorHandler)
 	err := r.Run()
@@ -22,7 +22,7 @@ func main() {
 
 func testHandler(c *gin.Context) {
 	var health models.GetOverallNetworkHealthResponseResponse
-	err := get("/network-health?timestamp", H{"__runsync": "true", "__timeout": "60", "__persistbapioutput": "true"}, &health)
+	err := Get("/network-health?timestamp", H{"__runsync": "true", "__timeout": "60", "__persistbapioutput": "true"}, &health)
 	if err != nil {
 		c.String(500, "failed to get health: %v", err)
 		c.Error(err)
@@ -31,9 +31,29 @@ func testHandler(c *gin.Context) {
 	c.JSON(200, health)
 }
 
+func deviceHealthHandler(c *gin.Context) {
+	mac := c.Param("mac")
+	entries := GetSensorEntries(mac)
+	respMap := make(map[string]*SensorData)
+	for i := len(entries) - 1; i >= 0; i-- {
+		entry := entries[i]
+		for name, value := range entry {
+			if _, ok := respMap[name]; !ok {
+				respMap[name] = &SensorData{Name: mac, MAC: mac, Type: name, Current: value.Data}
+			}
+			respMap[name].History = append(respMap[name].History, value)
+		}
+	}
+	var resp []*SensorData
+	for _, data := range respMap {
+		resp = append(resp, data)
+	}
+	c.JSON(200, resp)
+}
+
 func topologyHandler(c *gin.Context) {
 	var topology models.TopologyResult
-	err := get("/topology/physical-topology", nil, &topology)
+	err := Get("/topology/physical-topology", nil, &topology)
 	if err != nil {
 		c.String(500, "failed to get topology: %v", err)
 		c.Error(err)
@@ -58,7 +78,7 @@ func pathTraceHandler(c *gin.Context) {
 		protocol = "TCP"
 	}
 	var result models.FlowAnalysisRequestResultOutput
-	err := post("/flow-analysis", nil, &result, &models.FlowAnalysisRequest{
+	err := Post("/flow-analysis", nil, &result, &models.FlowAnalysisRequest{
 		Protocol:   protocol,
 		SourceIP:   source,
 		SourcePort: "80",
@@ -73,7 +93,7 @@ func pathTraceHandler(c *gin.Context) {
 	var trace models.PathResponseResult
 	status := "INPROGRESS"
 	for status == "INPROGRESS" {
-		err = get("/flow-analysis/"+result.Response.FlowAnalysisID, nil, &trace)
+		err = Get("/flow-analysis/"+result.Response.FlowAnalysisID, nil, &trace)
 		if err != nil {
 			c.String(500, "failed to get path trace results: %v", err)
 			c.Error(err)
@@ -89,11 +109,13 @@ func pathTraceHandler(c *gin.Context) {
 }
 
 func sensorHandler(c *gin.Context) {
-	body, err := ioutil.ReadAll(c.Request.Body)
+	ip := c.Param("ip")
+	log.Printf("[INFO] Got sensor information from %s\n", ip)
+	err := StoreSensorData(ip, c.Request.Body)
 	if err != nil {
-		c.String(500, "failed to read request body: %v", err)
+		c.String(500, "failed to decode request body: %v", err)
 		c.Error(err)
 		return
 	}
-	log.Printf("[INFO] Got sensor information from %s: %s\n", c.Param("ip"), body)
+	c.Status(204)
 }
