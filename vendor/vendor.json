@@ -238,6 +238,12 @@
 			"revisionTime": "2018-07-18T01:23:57Z"
 		},
 		{
+			"checksumSHA1": "rJ2PGuaUT6xZO9SNjmSx+hKbS5Y=",
+			"path": "github.com/ssimunic/gosensors",
+			"revision": "e7ab9a4e799b0ab8368b6e5f1f67f4b126e6a309",
+			"revisionTime": "2017-04-14T00:04:17Z"
+		},
+		{
 			"checksumSHA1": "Ocy7N1bNnMersjQSekHOT9ycVq4=",
 			"path": "github.com/ugorji/go/codec",
 			"revision": "7d13b37dbec67bb708a89efb93c1297ed3b552c6",

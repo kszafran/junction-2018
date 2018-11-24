@@ -32,7 +32,7 @@ func init() {
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 }
 
-func refreshToken() {
+func KeepTokenFresh() {
 	auth := func() {
 		log.Println("[INFO] Refreshing authorization token...")
 		token, err := authenticate()
@@ -75,7 +75,7 @@ func getToken() string {
 	return sharedToken
 }
 
-func get(path string, headers H, response interface{}) error {
+func Get(path string, headers H, response interface{}) error {
 	req, err := http.NewRequest("GET", "https://"+host+"/dna/intent/api/v1"+path, nil)
 	if err != nil {
 		return err
@@ -87,7 +87,7 @@ func get(path string, headers H, response interface{}) error {
 	return send(req, response)
 }
 
-func post(path string, headers H, response interface{}, request interface{}) error {
+func Post(path string, headers H, response interface{}, request interface{}) error {
 	body, err := json.Marshal(request)
 	if err != nil {
 		return err
