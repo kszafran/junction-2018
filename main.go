@@ -11,7 +11,7 @@ func main() {
 	r := gin.Default()
 	r.GET("/test", testHandler)
 	r.GET("/topology", topologyHandler)
-	r.GET("/device-health/:mac", deviceHealthHandler)
+	r.GET("/client-health/:mac", clientHealthHandler)
 	r.GET("/path-trace", pathTraceHandler)
 	r.POST("/sensor/:ip", sensorHandler)
 	err := r.Run()
@@ -22,7 +22,7 @@ func main() {
 
 func testHandler(c *gin.Context) {
 	var health models.GetOverallNetworkHealthResponseResponse
-	err := Get("/network-health?timestamp", H{"__runsync": "true", "__timeout": "60", "__persistbapioutput": "true"}, &health)
+	err := GET("/network-health?timestamp", H{"__runsync": "true", "__timeout": "60", "__persistbapioutput": "true"}, &health)
 	if err != nil {
 		c.String(500, "failed to get health: %v", err)
 		c.Error(err)
@@ -31,29 +31,19 @@ func testHandler(c *gin.Context) {
 	c.JSON(200, health)
 }
 
-func deviceHealthHandler(c *gin.Context) {
+func clientHealthHandler(c *gin.Context) {
 	mac := c.Param("mac")
 	entries := GetSensorEntries(mac)
-	respMap := make(map[string]*SensorData)
+	resp := ClientHealth{Name: mac, MAC: mac, Type: "TODO", Current: entries[len(entries)-1].Data}
 	for i := len(entries) - 1; i >= 0; i-- {
-		entry := entries[i]
-		for name, value := range entry {
-			if _, ok := respMap[name]; !ok {
-				respMap[name] = &SensorData{Name: mac, MAC: mac, Type: name, Current: value.Data}
-			}
-			respMap[name].History = append(respMap[name].History, value)
-		}
-	}
-	var resp []*SensorData
-	for _, data := range respMap {
-		resp = append(resp, data)
+		resp.History = append(resp.History, entries[i])
 	}
 	c.JSON(200, resp)
 }
 
 func topologyHandler(c *gin.Context) {
 	var topology models.TopologyResult
-	err := Get("/topology/physical-topology", nil, &topology)
+	err := GET("/topology/physical-topology", nil, &topology)
 	if err != nil {
 		c.String(500, "failed to get topology: %v", err)
 		c.Error(err)
@@ -78,7 +68,7 @@ func pathTraceHandler(c *gin.Context) {
 		protocol = "TCP"
 	}
 	var result models.FlowAnalysisRequestResultOutput
-	err := Post("/flow-analysis", nil, &result, &models.FlowAnalysisRequest{
+	err := POST("/flow-analysis", nil, &result, &models.FlowAnalysisRequest{
 		Protocol:   protocol,
 		SourceIP:   source,
 		SourcePort: "80",
@@ -93,7 +83,7 @@ func pathTraceHandler(c *gin.Context) {
 	var trace models.PathResponseResult
 	status := "INPROGRESS"
 	for status == "INPROGRESS" {
-		err = Get("/flow-analysis/"+result.Response.FlowAnalysisID, nil, &trace)
+		err = GET("/flow-analysis/"+result.Response.FlowAnalysisID, nil, &trace)
 		if err != nil {
 			c.String(500, "failed to get path trace results: %v", err)
 			c.Error(err)

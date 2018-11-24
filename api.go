@@ -1,6 +1,6 @@
 package main
 
-type SensorData struct {
+type ClientHealth struct {
 	Name        string       `json:"name,omitempty"`
 	MAC         string       `json:"mac,omitempty"`
 	Type        string       `json:"type,omitempty"`
