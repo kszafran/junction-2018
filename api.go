@@ -18,8 +18,3 @@ type Reading struct {
 	Date  int64  `json:"date"`
 	Value string `json:"value"`
 }
-
-type HistoryHealth struct {
-	Date int64 `json:"date"`
-	Data int   `json:"data"`
-}

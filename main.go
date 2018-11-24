@@ -84,7 +84,7 @@ func pathTraceHandler(c *gin.Context) {
 		return
 	}
 	if dest == "" {
-		c.String(400, "'target' query param missing")
+		c.String(400, "'dest' query param missing")
 		return
 	}
 	if protocol == "" {
