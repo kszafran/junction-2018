@@ -34,6 +34,7 @@ func main() {
 	refreshToken()
 
 	r := gin.Default()
+
 	r.GET("/test", func(c *gin.Context) {
 		var health models.GetOverallNetworkHealthResponseResponse
 		err := get("/network-health?timestamp", H{"__runsync": "true", "__timeout": "60", "__persistbapioutput": "true"}, &health)
@@ -44,6 +45,17 @@ func main() {
 		}
 		c.JSON(200, health)
 	})
+
+	r.POST("/sensor/:ip", func(c *gin.Context) {
+		body, err := ioutil.ReadAll(c.Request.Body)
+		if err != nil {
+			c.String(500, "failed to read request body: %v", err)
+			c.AbortWithError(500, err)
+			return
+		}
+		log.Printf("[INFO] Got sensor information from %s: %s\n", c.Param("ip"), body)
+	})
+
 	err := r.Run()
 	if err != nil {
 		log.Fatal(err)
@@ -55,7 +67,7 @@ func refreshToken() {
 		log.Println("[INFO] Refreshing authorization token...")
 		token, err := authenticate()
 		if err != nil {
-			log.Printf("[ERROR] failed to authenticate: %v", err)
+			log.Printf("[ERROR] failed to authenticate: %v\n", err)
 		}
 		mutex.Lock()
 		sharedToken = token
