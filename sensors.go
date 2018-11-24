@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"log"
 	"regexp"
-	"sort"
 	"strings"
 	"time"
 )
@@ -16,13 +15,10 @@ import (
 var readingRegex = regexp.MustCompile(`(\s*[+-]?[\d\s.]+[^(\s]+)(\s+\(.*\))?`)
 
 // MAC -> sensor data
-var sensorHistory = make(map[string][]SensorEntry)
+var sensorReadings = make(map[string]SensorReadings)
 
-// adapter -> values
-type SensorEntry map[string]TsReadings
-
-func GetSensorEntries(ip string) []SensorEntry {
-	return sensorHistory[ip]
+func GetSensorReadings(ip string) SensorReadings {
+	return sensorReadings[ip]
 }
 
 func StoreSensorData(mac string, info io.Reader) error {
@@ -42,8 +38,12 @@ func StoreSensorData(mac string, info io.Reader) error {
 	}
 
 	date := time.Now().Unix()
+	readings := sensorReadings[mac]
+	if readings == nil {
+		readings = SensorReadings{}
+		sensorReadings[mac] = readings
+	}
 
-	readings := make(SensorEntry)
 	for _, entries := range sensors.Chips {
 		if _, ok := entries["Adapter"]; !ok {
 			continue
@@ -51,33 +51,19 @@ func StoreSensorData(mac string, info io.Reader) error {
 		adapter := entries["Adapter"]
 		delete(entries, "Adapter")
 
-		hr := readings[adapter]
-		if hr.Date == 0 {
-			hr = TsReadings{Date: date}
-		}
-
 		for name, value := range entries {
 			submatch := readingRegex.FindSubmatch([]byte(value))
 			if len(submatch) <= 1 {
 				continue
 			}
-			hr.Data = append(hr.Data, Reading{
-				Name: name,
+			fullName := adapter + " " + name
+			readings[fullName] = append(readings[fullName], Reading{
+				Date: date,
 				Value: string(submatch[1]),
 			})
 		}
-
-		sort.Slice(hr.Data, func(i, j int) bool {
-			return hr.Data[i].Name < hr.Data[j].Name
-		})
-
-		readings[adapter] = hr
 	}
-
-	bytes, _ := json.Marshal(readings)
-	log.Printf("[INFO] Registered sensor reading from %s: %v\n", mac, string(bytes))
-
-	sensorHistory[mac] = append(sensorHistory[mac], readings)
+	log.Printf("[INFO] Successfully registered sensor reading from %s\n", mac)
 	return nil
 }
 

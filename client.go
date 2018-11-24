@@ -75,7 +75,7 @@ func getToken() string {
 	return sharedToken
 }
 
-func Get(path string, headers H, response interface{}) error {
+func GET(path string, headers H, response interface{}) error {
 	req, err := http.NewRequest("GET", "https://"+host+"/dna/intent/api/v1"+path, nil)
 	if err != nil {
 		return err
@@ -87,7 +87,7 @@ func Get(path string, headers H, response interface{}) error {
 	return send(req, response)
 }
 
-func Post(path string, headers H, response interface{}, request interface{}) error {
+func POST(path string, headers H, response interface{}, request interface{}) error {
 	body, err := json.Marshal(request)
 	if err != nil {
 		return err

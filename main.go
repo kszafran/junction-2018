@@ -4,56 +4,69 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/kszafran/junction-2018/models"
 	"log"
+	"strings"
 )
 
 func main() {
 	KeepTokenFresh()
 	r := gin.Default()
-	r.GET("/test", testHandler)
+	r.GET("/network-health", networkHealthHandler)
 	r.GET("/topology", topologyHandler)
-	r.GET("/device-health/:mac", deviceHealthHandler)
+	r.GET("/client-health/:mac", clientHealthHandler)
 	r.GET("/path-trace", pathTraceHandler)
-	r.POST("/sensor/:ip", sensorHandler)
+	r.POST("/sensor/:mac", sensorHandler)
 	err := r.Run()
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func testHandler(c *gin.Context) {
+func networkHealthHandler(c *gin.Context) {
 	var health models.GetOverallNetworkHealthResponseResponse
-	err := Get("/network-health?timestamp", H{"__runsync": "true", "__timeout": "60", "__persistbapioutput": "true"}, &health)
+	err := GET("/network-health?timestamp", H{"__runsync": "true", "__timeout": "60"}, &health)
 	if err != nil {
-		c.String(500, "failed to get health: %v", err)
+		c.String(500, "failed to get network health: %v", err)
 		c.Error(err)
 		return
 	}
-	c.JSON(200, health)
+	c.JSON(200, &health)
 }
 
-func deviceHealthHandler(c *gin.Context) {
-	mac := c.Param("mac")
-	entries := GetSensorEntries(mac)
-	respMap := make(map[string]*SensorData)
-	for i := len(entries) - 1; i >= 0; i-- {
-		entry := entries[i]
-		for name, value := range entry {
-			if _, ok := respMap[name]; !ok {
-				respMap[name] = &SensorData{Name: mac, MAC: mac, Type: name, Current: value.Data}
-			}
-			respMap[name].History = append(respMap[name].History, value)
+func clientHealthHandler(c *gin.Context) {
+	mac := strings.ToLower(c.Param("mac"))
+
+	var detail models.GetClientDetailResponseResponse
+	err := GET("/client-detail?timestamp&macAddress="+mac, H{"__runsync": "true", "__timeout": "60"}, &detail)
+	if err != nil {
+		c.String(500, "failed to get client detail: %v", err)
+		return
+	}
+
+	var client *models.GetClientDetailResponseResponseTopologyNodesItems0
+	for _, node := range detail.Topology.Nodes {
+		if node.Role == "Client" {
+			client = node
+			break
 		}
 	}
-	var resp []*SensorData
-	for _, data := range respMap {
-		resp = append(resp, data)
+
+	name := client.Name
+	if name == "" {
+		name = client.IP
 	}
-	c.JSON(200, resp)
+
+	c.JSON(200, &ClientHealth{
+		Name:    name,
+		MAC:     mac,
+		Type:    "lm-sensors",
+		Sensors: GetSensorReadings(mac),
+		CiscoHealth: client,
+	})
 }
 
 func topologyHandler(c *gin.Context) {
 	var topology models.TopologyResult
-	err := Get("/topology/physical-topology", nil, &topology)
+	err := GET("/topology/physical-topology", nil, &topology)
 	if err != nil {
 		c.String(500, "failed to get topology: %v", err)
 		c.Error(err)
@@ -71,14 +84,14 @@ func pathTraceHandler(c *gin.Context) {
 		return
 	}
 	if dest == "" {
-		c.String(400, "'target' query param missing")
+		c.String(400, "'dest' query param missing")
 		return
 	}
 	if protocol == "" {
 		protocol = "TCP"
 	}
 	var result models.FlowAnalysisRequestResultOutput
-	err := Post("/flow-analysis", nil, &result, &models.FlowAnalysisRequest{
+	err := POST("/flow-analysis", nil, &result, &models.FlowAnalysisRequest{
 		Protocol:   protocol,
 		SourceIP:   source,
 		SourcePort: "80",
@@ -93,7 +106,7 @@ func pathTraceHandler(c *gin.Context) {
 	var trace models.PathResponseResult
 	status := "INPROGRESS"
 	for status == "INPROGRESS" {
-		err = Get("/flow-analysis/"+result.Response.FlowAnalysisID, nil, &trace)
+		err = GET("/flow-analysis/"+result.Response.FlowAnalysisID, nil, &trace)
 		if err != nil {
 			c.String(500, "failed to get path trace results: %v", err)
 			c.Error(err)
@@ -105,13 +118,16 @@ func pathTraceHandler(c *gin.Context) {
 		c.String(500, "path trace %s: %s", status, trace.Response.Request.FailureReason)
 		return
 	}
-	c.JSON(200, trace.Response.NetworkElementsInfo)
+	c.JSON(200, &PathTrace{
+		Duration: trace.Response.Request.LastUpdateTime - trace.Response.Request.CreateTime,
+		Elements: trace.Response.NetworkElementsInfo,
+	})
 }
 
 func sensorHandler(c *gin.Context) {
-	ip := c.Param("ip")
-	log.Printf("[INFO] Got sensor information from %s\n", ip)
-	err := StoreSensorData(ip, c.Request.Body)
+	mac := strings.ToLower(c.Param("mac"))
+	log.Printf("[INFO] Got sensor information from %s\n", mac)
+	err := StoreSensorData(mac, c.Request.Body)
 	if err != nil {
 		c.String(500, "failed to decode request body: %v", err)
 		c.Error(err)

@@ -1,30 +1,27 @@
 package main
 
-type SensorData struct {
-	Name        string       `json:"name,omitempty"`
-	MAC         string       `json:"mac,omitempty"`
-	Type        string       `json:"type,omitempty"`
-	Current     []Reading    `json:"current,omitempty"`
-	History     []TsReadings `json:"data_history,omitempty"`
-	CiscoHealth CiscoHealth  `json:"cisco_health_data"`
+import "github.com/kszafran/junction-2018/models"
+
+type CiscoHealth *models.GetClientDetailResponseResponseTopologyNodesItems0
+
+type ClientHealth struct {
+	Name        string         `json:"name,omitempty"`
+	MAC         string         `json:"mac,omitempty"`
+	Type        string         `json:"type,omitempty"`
+	Sensors     SensorReadings `json:"data_history,omitempty"`
+	CiscoHealth CiscoHealth    `json:"cisco_health_data"`
 }
 
-type TsReadings struct {
-	Date int64     `json:"date"`
-	Data []Reading `json:"data,omitempty"`
-}
+type SensorReadings map[string][]Reading
 
 type Reading struct {
-	Name  string `json:"name"`
+	Date  int64  `json:"date"`
 	Value string `json:"value"`
 }
 
-type CiscoHealth struct {
-	Current int             `json:"current_health_data"`
-	History []HistoryHealth `json:"history_health_data,omitempty"`
-}
+type Elements []*models.PathResponseResultResponseNetworkElementsInfoItems0
 
-type HistoryHealth struct {
-	Date int64 `json:"date"`
-	Data int   `json:"data"`
+type PathTrace struct {
+	Duration int64    `json:"duration"`
+	Elements Elements `json:"elements"`
 }

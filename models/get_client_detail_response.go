@@ -209,7 +209,7 @@ type GetClientDetailResponseResponseConnectionInfo struct {
 	SpatialStream string `json:"spatialStream,omitempty"`
 
 	// timestamp
-	Timestamp string `json:"timestamp,omitempty"`
+	Timestamp int64 `json:"timestamp,omitempty"`
 
 	// uapsd
 	Uapsd string `json:"uapsd,omitempty"`
@@ -682,13 +682,13 @@ func (m *GetClientDetailResponseResponseTopologyLinksItems0) UnmarshalBinary(b [
 type GetClientDetailResponseResponseTopologyNodesItems0 struct {
 
 	// clients
-	Clients string `json:"clients,omitempty"`
+	Clients int `json:"clients,omitempty"`
 
 	// connected device
 	ConnectedDevice string `json:"connectedDevice,omitempty"`
 
 	// count
-	Count string `json:"count,omitempty"`
+	Count int `json:"count,omitempty"`
 
 	// description
 	Description string `json:"description,omitempty"`
@@ -703,7 +703,7 @@ type GetClientDetailResponseResponseTopologyNodesItems0 struct {
 	Family string `json:"family,omitempty"`
 
 	// health score
-	HealthScore string `json:"healthScore,omitempty"`
+	HealthScore int `json:"healthScore,omitempty"`
 
 	// id
 	ID string `json:"id,omitempty"`
@@ -712,7 +712,7 @@ type GetClientDetailResponseResponseTopologyNodesItems0 struct {
 	IP string `json:"ip,omitempty"`
 
 	// level
-	Level string `json:"level,omitempty"`
+	Level int `json:"level,omitempty"`
 
 	// name
 	Name string `json:"name,omitempty"`
