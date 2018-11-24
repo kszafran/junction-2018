@@ -4,11 +4,12 @@ import DeviceList from "./components/DeviceList";
 import DeviceDetails from "./components/DeviceDetails";
 import { Route } from "react-router-dom";
 import "./App.css";
+import Loader from "./components/Loader";
 
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = { devices: [] };
+    this.state = { devices: [], loader: true };
   }
 
   fetchJSON = async url => {
@@ -26,13 +27,12 @@ class App extends Component {
     const urlsArray = [MOCK_DATA_URL, DNA_C_DATA];
     const promiseArray = urlsArray.map(url => this.fetchJSON(url));
     const dataArray = await Promise.all(promiseArray);
-    console.log("dataArray", dataArray);
 
     const devices = [...dataArray[0], dataArray[1]];
-    console.log("devices", devices);
 
     this.setState({
-      devices: devices
+      devices: devices,
+      loader: false
     });
   };
 
@@ -41,9 +41,9 @@ class App extends Component {
   };
 
   render() {
-    const { devices } = this.state;
+    const { devices, loader } = this.state;
 
-    return (
+    const Main = (
       <div className="App">
         <Header />
         <div className="wrapper">
@@ -64,6 +64,8 @@ class App extends Component {
         </div>
       </div>
     );
+
+    return loader ? <Loader /> : Main;
   }
 }
 

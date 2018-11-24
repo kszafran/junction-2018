@@ -4,7 +4,7 @@ import moment from "moment";
 
 export default class HistoryChart extends Component {
   render() {
-    const { selectedId, data } = this.props;
+    const { selectedId, data, name } = this.props;
 
     const labels = data[selectedId].map(e => {
       return moment.unix(e.date).format("hh:mm:ss");
@@ -18,18 +18,12 @@ export default class HistoryChart extends Component {
       labels: labels,
       datasets: [
         {
+          label: name,
           data: values
         }
       ]
     };
 
-    const option = {
-      title: {
-        display: true,
-        text: "asd"
-      }
-    };
-
-    return <Line data={chartData} option={option} height={100} />;
+    return <Line data={chartData} height={100} />;
   }
 }

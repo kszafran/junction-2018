@@ -32,7 +32,11 @@ export default class DeviceDetails extends Component {
 
     return (
       <React.Fragment>
-        <HistoryChart data={chartData} selectedId={this.state.selectedId} />
+        <HistoryChart
+          data={chartData}
+          selectedId={this.state.selectedId}
+          name={name}
+        />
 
         <DisplayMode
           device={device}

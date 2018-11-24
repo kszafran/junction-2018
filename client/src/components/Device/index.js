@@ -4,7 +4,6 @@ import "./index.css";
 
 const Device = ({ data }) => {
   const { name, cisco_health_data } = data;
-  console.log("DATA", data);
 
   const currentHealthData = cisco_health_data
     ? cisco_health_data.healthScore
