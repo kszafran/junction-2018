@@ -1,0 +1,16 @@
+.custom-radios input[type="radio"] {
+    display: none;
+  }
+  
+  .custom-radios input[type="radio"] + label {
+    display: inline-block;
+    box-sizing: border-box;
+    cursor: pointer;
+    padding: 5px 15px;
+    border: 1px solid #f5f5f5;
+  }
+  
+  .custom-radios input[type="radio"]:checked + label {
+    background: #dadada;
+    transition: 0.6s;
+  }

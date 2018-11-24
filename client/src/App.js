@@ -11,20 +11,33 @@ class App extends Component {
     this.state = { devices: [] };
   }
 
-  componentDidMount = async () => {
-    const MOCK_DATA_URL =
-      "https://gist.githubusercontent.com/vietdang7/a5d495df7bc398a1f6c46eade07d452d/raw/d4f7639672d99e1556300c4404356d436e64e854/Junction%2520Data";
+  fetchJSON = async url => {
+    const response = await fetch(url);
+    return await response.json();
+  };
 
-    const result = await fetch(MOCK_DATA_URL);
-    const devices = await result.json();
+  componentDidMount = async () => {
+    // return only 1 object from the API
+    const DNA_C_DATA =
+      "https://cors-anywhere.herokuapp.com/https://peaceful-shelf-99858.herokuapp.com/client-health/3c:97:0e:da:3c:65";
+
+    const MOCK_DATA_URL =
+      "https://gist.githubusercontent.com/ashleynguci/5fd6c84358844f9ac50f713b039bad8f/raw/a1cde2ca3787f31cb960c591b27f70d6634f2145/mock.json";
+    const urlsArray = [MOCK_DATA_URL, DNA_C_DATA];
+    const promiseArray = urlsArray.map(url => this.fetchJSON(url));
+    const dataArray = await Promise.all(promiseArray);
+    console.log("dataArray", dataArray);
+
+    const devices = [...dataArray[0], dataArray[1]];
+    console.log("devices", devices);
 
     this.setState({
-      devices
+      devices: devices
     });
   };
 
-  getDeviceFromID = id => {
-    return this.state.devices.find(e => e.id === id);
+  getDeviceFromName = name => {
+    return this.state.devices.find(e => e.name === name);
   };
 
   render() {
@@ -40,11 +53,11 @@ class App extends Component {
             render={() => <DeviceList devices={devices} />}
           />
           <Route
-            path="/device/:id"
+            path="/device/:name"
             render={props => (
               <DeviceDetails
                 {...props}
-                getDeviceFromID={this.getDeviceFromID}
+                getDeviceFromName={this.getDeviceFromName}
               />
             )}
           />

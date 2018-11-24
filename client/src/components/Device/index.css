@@ -16,7 +16,27 @@
   width: 100%;
 }
 
+.device .status {
+  font-weight: 700;
+}
+
 .device .status,
 .device .detail {
   justify-content: center;
+}
+
+.red-color {
+  color: #fb0d1c;
+}
+
+.orange-color {
+  color: #fd9826;
+}
+
+.yellow-color {
+  color: #c2c012;
+}
+
+.green-color {
+  color: #15951a;
 }
