@@ -11,7 +11,7 @@ func main() {
 	r := gin.Default()
 	r.GET("/test", testHandler)
 	r.GET("/topology", topologyHandler)
-	r.GET("/device-health/:ip", deviceHealthHandler)
+	r.GET("/device-health/:mac", deviceHealthHandler)
 	r.GET("/path-trace", pathTraceHandler)
 	r.POST("/sensor/:ip", sensorHandler)
 	err := r.Run()
@@ -32,14 +32,14 @@ func testHandler(c *gin.Context) {
 }
 
 func deviceHealthHandler(c *gin.Context) {
-	ip := c.Param("ip")
-	entries := GetSensorEntries(ip)
+	mac := c.Param("mac")
+	entries := GetSensorEntries(mac)
 	respMap := make(map[string]*SensorData)
 	for i := len(entries) - 1; i >= 0; i-- {
 		entry := entries[i]
 		for name, value := range entry {
 			if _, ok := respMap[name]; !ok {
-				respMap[name] = &SensorData{Name: ip, IP: ip, Type: name, Current: value.Data}
+				respMap[name] = &SensorData{Name: mac, MAC: mac, Type: name, Current: value.Data}
 			}
 			respMap[name].History = append(respMap[name].History, value)
 		}
@@ -113,7 +113,7 @@ func sensorHandler(c *gin.Context) {
 	log.Printf("[INFO] Got sensor information from %s\n", ip)
 	err := StoreSensorData(ip, c.Request.Body)
 	if err != nil {
-		c.String(500, "failed to read decode request body: %v", err)
+		c.String(500, "failed to decode request body: %v", err)
 		c.Error(err)
 		return
 	}

@@ -2,17 +2,20 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/ssimunic/gosensors"
 	"io"
+	"io/ioutil"
 	"log"
 	"regexp"
 	"sort"
+	"strings"
 	"time"
 )
 
 var readingRegex = regexp.MustCompile(`(\s*[+-]?[\d\s.]+[^(\s]+)(\s+\(.*\))?`)
 
-// ip -> sensor data
+// MAC -> sensor data
 var sensorHistory = make(map[string][]SensorEntry)
 
 // adapter -> values
@@ -22,13 +25,20 @@ func GetSensorEntries(ip string) []SensorEntry {
 	return sensorHistory[ip]
 }
 
-func StoreSensorData(ip string, info io.Reader) error {
-	log.Printf("[INFO] Got sensor information from %s\n", ip)
-
-	var sensors gosensors.Sensors
-	err := json.NewDecoder(info).Decode(&sensors)
+func StoreSensorData(mac string, info io.Reader) error {
+	infostring, err := ioutil.ReadAll(info)
 	if err != nil {
 		return err
+	}
+	log.Printf("[DEBUG] Got sensor information from %s: %s\n", mac, infostring)
+
+	var sensors gosensors.Sensors
+	err = json.NewDecoder(strings.NewReader(string(infostring))).Decode(&sensors)
+	if err != nil {
+		return err
+	}
+	if len(sensors.Chips) == 0 {
+		return errors.New("no sensor information found")
 	}
 
 	date := time.Now().Unix()
@@ -65,9 +75,9 @@ func StoreSensorData(ip string, info io.Reader) error {
 	}
 
 	bytes, _ := json.Marshal(readings)
-	log.Printf("[INFO] Registered sensor reading: %v\n", string(bytes))
+	log.Printf("[INFO] Registered sensor reading from %s: %v\n", mac, string(bytes))
 
-	sensorHistory[ip] = append(sensorHistory[ip], readings)
+	sensorHistory[mac] = append(sensorHistory[mac], readings)
 	return nil
 }
 
