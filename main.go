@@ -10,7 +10,7 @@ import (
 func main() {
 	KeepTokenFresh()
 	r := gin.Default()
-	r.GET("/test", testHandler)
+	r.GET("/network-health", networkHealthHandler)
 	r.GET("/topology", topologyHandler)
 	r.GET("/client-health/:mac", clientHealthHandler)
 	r.GET("/path-trace", pathTraceHandler)
@@ -21,15 +21,15 @@ func main() {
 	}
 }
 
-func testHandler(c *gin.Context) {
+func networkHealthHandler(c *gin.Context) {
 	var health models.GetOverallNetworkHealthResponseResponse
 	err := GET("/network-health?timestamp", H{"__runsync": "true", "__timeout": "60"}, &health)
 	if err != nil {
-		c.String(500, "failed to get health: %v", err)
+		c.String(500, "failed to get network health: %v", err)
 		c.Error(err)
 		return
 	}
-	c.JSON(200, health)
+	c.JSON(200, &health)
 }
 
 func clientHealthHandler(c *gin.Context) {
@@ -55,7 +55,7 @@ func clientHealthHandler(c *gin.Context) {
 		name = client.IP
 	}
 
-	c.JSON(200, ClientHealth{
+	c.JSON(200, &ClientHealth{
 		Name:    name,
 		MAC:     mac,
 		Type:    "lm-sensors",
@@ -118,7 +118,10 @@ func pathTraceHandler(c *gin.Context) {
 		c.String(500, "path trace %s: %s", status, trace.Response.Request.FailureReason)
 		return
 	}
-	c.JSON(200, trace.Response.NetworkElementsInfo)
+	c.JSON(200, &PathTrace{
+		Duration: trace.Response.Request.LastUpdateTime - trace.Response.Request.CreateTime,
+		Elements: trace.Response.NetworkElementsInfo,
+	})
 }
 
 func sensorHandler(c *gin.Context) {

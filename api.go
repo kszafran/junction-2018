@@ -18,3 +18,10 @@ type Reading struct {
 	Date  int64  `json:"date"`
 	Value string `json:"value"`
 }
+
+type Elements []*models.PathResponseResultResponseNetworkElementsInfoItems0
+
+type PathTrace struct {
+	Duration int64    `json:"duration"`
+	Elements Elements `json:"elements"`
+}
