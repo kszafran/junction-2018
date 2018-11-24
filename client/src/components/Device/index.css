@@ -1,0 +1,22 @@
+.device {
+  padding: 5px 10px;
+  display: grid;
+  grid-template-columns: 4fr 3fr 1fr;
+  border: 1px solid lightgrey;
+}
+
+.device > * {
+  display: flex;
+  align-items: center;
+}
+
+.device button {
+  padding: 0 10px;
+  height: 30px;
+  width: 100%;
+}
+
+.device .status,
+.device .detail {
+  justify-content: center;
+}

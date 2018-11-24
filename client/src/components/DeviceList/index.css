@@ -1,0 +1,19 @@
+.title {
+  font-size: 120%;
+  margin-bottom: 20px;
+}
+
+.status {
+  text-align: center;
+}
+
+.list-title {
+  display: grid;
+  grid-template-columns: 4fr 3fr 1fr;
+  margin-bottom:10px;
+  padding:10px;
+}
+
+.device-list {
+  border:1px solid lightgrey;
+}
