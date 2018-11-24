@@ -4,7 +4,9 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/kszafran/junction-2018/models"
 	"log"
 	"net/http"
@@ -23,15 +25,25 @@ var token string
 
 func main() {
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
-	err := authenticate()
-
-	var health models.GetOverallNetworkHealthResponseResponse
-	err = get("/network-health?timestamp", H{"__runsync": "true", "__timeout": "60", "__persistbapioutput": "true"}, &health)
+	r := gin.Default()
+	r.GET("/test", func(c *gin.Context) {
+		err := authenticate()
+		if err != nil {
+			c.AbortWithError(500, errors.New(fmt.Sprintf("failed to authenticate: %v", err)))
+			return
+		}
+		var health models.GetOverallNetworkHealthResponseResponse
+		err = get("/network-health?timestamp", H{"__runsync": "true", "__timeout": "60", "__persistbapioutput": "true"}, &health)
+		if err != nil {
+			c.AbortWithError(500, errors.New(fmt.Sprintf("failed to get health: %v", err)))
+			return
+		}
+		c.JSON(200, health)
+	})
+	err := r.Run()
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("%#v\n", health)
 }
 
 func authenticate() error {
@@ -55,7 +67,7 @@ func authenticate() error {
 	return nil
 }
 
-func get(path string, headers map[string]string, response interface{}) error {
+func get(path string, headers H, response interface{}) error {
 	req, err := http.NewRequest("GET", "https://"+host+"/dna/intent/api/v1"+path, nil)
 	if err != nil {
 		return err
