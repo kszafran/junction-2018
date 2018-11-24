@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/kszafran/junction-2018/models"
 	"log"
+	"strings"
 )
 
 func main() {
@@ -13,7 +14,7 @@ func main() {
 	r.GET("/topology", topologyHandler)
 	r.GET("/client-health/:mac", clientHealthHandler)
 	r.GET("/path-trace", pathTraceHandler)
-	r.POST("/sensor/:ip", sensorHandler)
+	r.POST("/sensor/:mac", sensorHandler)
 	err := r.Run()
 	if err != nil {
 		log.Fatal(err)
@@ -32,11 +33,12 @@ func testHandler(c *gin.Context) {
 }
 
 func clientHealthHandler(c *gin.Context) {
-	mac := c.Param("mac")
-	entries := GetSensorEntries(mac)
-	resp := ClientHealth{Name: mac, MAC: mac, Type: "TODO", Current: entries[len(entries)-1].Data}
-	for i := len(entries) - 1; i >= 0; i-- {
-		resp.History = append(resp.History, entries[i])
+	mac := strings.ToLower(c.Param("mac"))
+	resp := ClientHealth{
+		Name: mac,
+		MAC: mac,
+		Type: "TODO",
+		Sensors: GetSensorReadings(mac),
 	}
 	c.JSON(200, resp)
 }
@@ -99,9 +101,9 @@ func pathTraceHandler(c *gin.Context) {
 }
 
 func sensorHandler(c *gin.Context) {
-	ip := c.Param("ip")
-	log.Printf("[INFO] Got sensor information from %s\n", ip)
-	err := StoreSensorData(ip, c.Request.Body)
+	mac := strings.ToLower(c.Param("mac"))
+	log.Printf("[INFO] Got sensor information from %s\n", mac)
+	err := StoreSensorData(mac, c.Request.Body)
 	if err != nil {
 		c.String(500, "failed to decode request body: %v", err)
 		c.Error(err)
