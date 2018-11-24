@@ -1,5 +1,9 @@
 package main
 
+import "github.com/kszafran/junction-2018/models"
+
+type CiscoHealth *models.GetClientDetailResponseResponseTopologyNodesItems0
+
 type ClientHealth struct {
 	Name        string         `json:"name,omitempty"`
 	MAC         string         `json:"mac,omitempty"`
@@ -13,11 +17,6 @@ type SensorReadings map[string][]Reading
 type Reading struct {
 	Date  int64  `json:"date"`
 	Value string `json:"value"`
-}
-
-type CiscoHealth struct {
-	Current int             `json:"current_health_data"`
-	History []HistoryHealth `json:"history_health_data,omitempty"`
 }
 
 type HistoryHealth struct {

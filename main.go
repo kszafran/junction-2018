@@ -23,7 +23,7 @@ func main() {
 
 func testHandler(c *gin.Context) {
 	var health models.GetOverallNetworkHealthResponseResponse
-	err := GET("/network-health?timestamp", H{"__runsync": "true", "__timeout": "60", "__persistbapioutput": "true"}, &health)
+	err := GET("/network-health?timestamp", H{"__runsync": "true", "__timeout": "60"}, &health)
 	if err != nil {
 		c.String(500, "failed to get health: %v", err)
 		c.Error(err)
@@ -34,13 +34,34 @@ func testHandler(c *gin.Context) {
 
 func clientHealthHandler(c *gin.Context) {
 	mac := strings.ToLower(c.Param("mac"))
-	resp := ClientHealth{
-		Name: mac,
-		MAC: mac,
-		Type: "TODO",
-		Sensors: GetSensorReadings(mac),
+
+	var detail models.GetClientDetailResponseResponse
+	err := GET("/client-detail?timestamp&macAddress="+mac, H{"__runsync": "true", "__timeout": "60"}, &detail)
+	if err != nil {
+		c.String(500, "failed to get client detail: %v", err)
+		return
 	}
-	c.JSON(200, resp)
+
+	var client *models.GetClientDetailResponseResponseTopologyNodesItems0
+	for _, node := range detail.Topology.Nodes {
+		if node.Role == "Client" {
+			client = node
+			break
+		}
+	}
+
+	name := client.Name
+	if name == "" {
+		name = client.IP
+	}
+
+	c.JSON(200, ClientHealth{
+		Name:    name,
+		MAC:     mac,
+		Type:    "lm-sensors",
+		Sensors: GetSensorReadings(mac),
+		CiscoHealth: client,
+	})
 }
 
 func topologyHandler(c *gin.Context) {
