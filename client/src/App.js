@@ -34,7 +34,11 @@ class App extends Component {
       <div className="App">
         <Header />
         <div className="wrapper">
-          <Route exact path="/" render={() => <DeviceList devices={devices} />} />
+          <Route
+            exact
+            path="/"
+            render={() => <DeviceList devices={devices} />}
+          />
           <Route
             path="/device/:id"
             render={props => (

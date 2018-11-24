@@ -8,7 +8,6 @@ const Device = ({ data }) => {
     name,
     cisco_health_data: { current_health_data }
   } = data;
-  console.log("id,", id);
 
   return (
     <div>
@@ -16,7 +15,7 @@ const Device = ({ data }) => {
         <div className="name">{name}</div>
         <div className="status">{current_health_data}</div>
 
-        <Link to={`device/${id}`}>
+        <Link to={`/device/${id}`}>
           <button className="detail">Details</button>
         </Link>
       </div>
