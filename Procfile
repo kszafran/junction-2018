@@ -1,1 +1,1 @@
-web: junction-2018
+web: node server.js
