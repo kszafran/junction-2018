@@ -5,7 +5,7 @@ import "./index.css";
 const Loader = () => {
   return (
     <div className="loader">
-      <img src={logo} />
+      <img src={logo} alt="loader logo" />
       <div className="lds-ellipsis">
         <div />
         <div />

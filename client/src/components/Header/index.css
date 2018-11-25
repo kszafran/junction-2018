@@ -4,7 +4,7 @@
   justify-content: space-between;
   align-items: center;
   flex-direction: row;
-  padding: 10px 10%;
+  padding: 13px 10%;
   font-family: "Montserrat";
 }
 
@@ -12,7 +12,7 @@
   color: white;
 }
 
-.header img {
+.header > img {
   width: 70px;
   height: 70px;
   border-radius: 50%;

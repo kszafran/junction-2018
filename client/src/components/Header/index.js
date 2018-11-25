@@ -1,5 +1,6 @@
 import React from "react";
 import avatarPlaceholder from "../../assets/images/avatar.png";
+import appLogo from "../../assets/images/logo_top.png";
 import { Link } from "react-router-dom";
 
 import "./index.css";
@@ -9,9 +10,9 @@ const Header = () => {
     <div className="header">
       <div />
       <Link to="/">
-        <h1>Cisco Comfort</h1>
+        <img src={appLogo} alt="app logo" />
       </Link>
-      <img src={avatarPlaceholder} alt="" />
+      <img src={avatarPlaceholder} alt="avatar place holder" />
     </div>
   );
 };
